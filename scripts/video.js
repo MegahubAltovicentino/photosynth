@@ -1,10 +1,11 @@
 import * as THREE from 'three';
+import { contain } from 'three/src/extras/TextureUtils.js';
 
 const container = document.getElementById('three-container');
 
 // SCENE SETUP --------------------------------------------------------------
 const scene = new THREE.Scene();
-scene.background = new THREE.Color(0x000000);
+scene.background = null;
 
 const camera = new THREE.PerspectiveCamera(75, container.offsetWidth / container.offsetHeight, 0.1, 1000);
 camera.position.z = 3;
@@ -15,22 +16,14 @@ container.appendChild(renderer.domElement);
 
 // VIDEO LOADING ------------------------------------------------------------
 const video = document.createElement('video');
-video.src = '/videos/Chrysaora_Fuscescens_Monterey_Bay_Aquarium_Monterey.mp4'; // Replace with your video path
+video.src = '/videos/Chrysaora_Fuscescens_Aquarium_Monterey.mp4'; 
 video.loop = true;
 video.muted = true;
-video.play();
 
-let videoWidth = 500;
-let videoHeight = 500;
+let videoWidth = container.offsetWidght;
+let videoHeight = container.offsetHeight;
 
 const videoTexture = new THREE.VideoTexture(video);
-
-video.addEventListener('loadedmetadata', () => {
-    videoWidth = video.videoWidth;
-    videoHeight = video.videoHeight;
-
-    console.log('Video Dimensions:', videoWidth, videoHeight);  
-});
 
 // PLANE MESH ----------------------------------------------------------
 
@@ -74,6 +67,21 @@ const plane = new THREE.Mesh(geometry, material);
 scene.add(plane);
 
 // ANIMATION LOOP -----------------------------------------------------------
+
+video.addEventListener('loadedmetadata', () => {
+    videoHeight = container.offsetHeight; 
+    videoWidth = container.offsetWidth;
+
+    console.log('Video Dimensions:', videoWidth, videoHeight);
+
+    // Update plane geometry with actual video dimensions
+    const updatedGeometry = new THREE.PlaneGeometry(videoWidth / 100, videoHeight / 100);
+    plane.geometry.dispose(); // Dispose of the old geometry
+    plane.geometry = updatedGeometry; // Assign the new geometry
+});
+
+// Play the video
+video.play();
 
 function animate() {
     requestAnimationFrame(animate);
